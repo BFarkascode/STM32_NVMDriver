@@ -40,7 +40,8 @@ So let’s put the Blink function of our code to a certain position in memory th
 Well, that’s not that straightforward since it doesn’t seem to be a lot of option on it in our main.c file. That’s because we aren’t even doing it there!
 We need to go to the linker file… stored in the root folder of the STM32 project with the extension “.ld”. (For this project, the linker file is provided separately.)
 The linker file is used by the toolchain to assign memory locations and partitions. It is not written in c, but something called “link editor command language”. We can modify this linker file to have our own memory area/partition and then to force the compiler to move data into a section within that area. As such:
-1)We add a new memory partition called APP_MEM by adding a line to the “memory definition” part in the linker file just after the “RAM” and the “FLASH” areas. We define it to start from the origin 0x800c000 and have a length of 16kbytes. We need to decrease the FLASH partition length by the same length as APP_MEM is. Of note, the vector table (the mcu phone book) is – unless otherwise told so – will be stored at the memory address 0x8000000 thus the FLASH partition must start from there!
+
+1) We add a new memory partition called APP_MEM by adding a line to the “memory definition” part in the linker file just after the “RAM” and the “FLASH” areas. We define it to start from the origin 0x800c000 and have a length of 16kbytes. We need to decrease the FLASH partition length by the same length as APP_MEM is. Of note, the vector table (the mcu phone book) is – unless otherwise told so – will be stored at the memory address 0x8000000 thus the FLASH partition must start from there!
 
 ```
 /* Memories definition */
@@ -52,7 +53,7 @@ MEMORY
 }
 ```
 
-2)We define the app_section and then place it within the APP_MEM partition. We place the Blink_custom function we will be defining in the main.c into this section. The syntax is particular and should be followed to the letter, otherwise the compiler might optimize out the memory section. The “KEEP” keyword – which works at “volatile” in c - is particularly useful. ALIGN(4) is a Cortex M architecture demand to align the location to 4 bytes. We tell the linker to put this section into the APP_MEM area and we finish the definition with a memory overflow check, albeit this is not necessary.
+2) We define the app_section and then place it within the APP_MEM partition. We place the Blink_custom function we will be defining in the main.c into this section. The syntax is particular and should be followed to the letter, otherwise the compiler might optimize out the memory section. The “KEEP” keyword – which works at “volatile” in c - is particularly useful. ALIGN(4) is a Cortex M architecture demand to align the location to 4 bytes. We tell the linker to put this section into the APP_MEM area and we finish the definition with a memory overflow check, albeit this is not necessary.
 
 ```
 /*APP mem section definition*/
@@ -74,14 +75,17 @@ One more part to look at is the “initialized data section” or the “data”
 ```
 __attribute__((section(".RamFunc")))
 ```
-
 needs to be added before the prototype of the function. The proposed “__RAM_FUNC” attribute assignment did not work for me on the STM32L0xx but should be fine on a BluePill.
+
 For more on linker files, I recommend checking this out: Writing Linker Script for STM32 (Arm Cortex M3)🛠️ | by Rohit Nimkar | Medium
 
 ### Memory replacement
 The FLASH must always be erased prior to writing to it. That’s because the NVM management system within the mcu does not overwrite the existing value within the memory position but instead uses a bitwise “OR” on the location. This is a simple addition if we have 0x0 in the memory, but if we are to write 0x80 to a location where we had 0x1 before, the result of the memory write will be 0x81.
+
 FLASH cannot be erased byte-by-byte either. The smaller section one can erase is a page of memory, which is 128 bytes of data. As such, for any kind of FLASH update, the smaller section to replace is 32 words (32 times 4 bytes).
+
 FLASH has a word-by-word (4 bytes) and a half-page write capability. Half-page is more sensitive due to the bursting of data but is around 10 times faster than writing word-by-word. Nothing smaller than 4 bytes can be written.
+
 Lastly, one must be very cautious about the endian of the information that is funnelled into the FLASH. The writing process swaps the endian of the 4 bytes, where the 0th byte will be written to the last position (and vica versa) and the 1st will be swapped by the 2nd.
 
 ### Blocking you MUST have!
@@ -89,4 +93,5 @@ Writing to FLASH takes at least 3.2 ms, independent of which process is being ex
 
 ## User guide
 The driver codes provided are self-containing.
+
 The main.c shows working examples for the driver where we define a custom Blink function that is placed by the linker to a specific memory location. We then replace this Blink function (it is half a page long exactly) when we push a button. The difference between the versions of the Blnik function will be the blinking speed.
