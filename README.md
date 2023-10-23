@@ -1,17 +1,22 @@
 # STM32_NVMDriver
 ## General description
 This is a bare metal guide for implementing FLASH management for STM32L0xx.
+
 First and foremost, it must be discussed what we will be doing and on what. There are multiple memory types in the mcu, such as RAM, FLASH, EEPROM…and even though the driver section in the reference manual (refman) talks about non-volatile memory (NVM), we will be looking at the FLASH section only. As such, even though the refman will be constantly pointing to NVMs, we will be talking about the FLASH.
+
 Why? Wouldn’t it be simpler to use something special like EEPROM – another NVM – to use for memory testing? Sort of…albeit in my mind, digging inside the FLASH of a micro is terrifying compared to EEPROM. After all, if something goes sideways, mucking inside a FLASH can lead to adverse outcomes (even bricking) while messing up the EEPROM would not do any particular harm. For all intents and purposes, modifying the FLASH of an mcu is doing brain surgery on it. Having an mcu modify ITSELF – which we will be doing here – is like conducting brain surgery on yourself! Pretty nasty with a rather low margin of failure.
+
 I believe the best way to do such guide is to have a relatable example. Say, we have a simple Blink function, and we want to change the blinking speed when we push a button. Depending on what abstraction layer or environment we were using, this usually means a few lines of code and a variable that needs to hold the value of the delay between blinks: we change within the code the value the variable is holding and behold, we have a different time delay between our blinks. Here, what happens in layman’s terms is that:
--upon startup, we “import” the Blink code into the mcu RAM from the mcu FLASH memory (where the Blink code is stored in some form of machine code after the mcu toolchain have compiled and uploaded it)
--we attach a variable to this Blink code that will hold the delay value
--we change the variable’s value depending on our button push
--we enjoy our blinky
+- upon startup, we “import” the Blink code into the mcu RAM from the mcu FLASH memory (where the Blink code is stored in some form of machine code after the mcu toolchain have compiled and uploaded it)
+- we attach a variable to this Blink code that will hold the delay value
+- we change the variable’s value depending on our button push
+- we enjoy our blinky
+- 
 Nice and easy, simplest thing one can do with an mcu.
+
 Let’s go ultra hard mode on this example:
--instead of changing a variable, let’s define the delay as a constant within the blink function
--rewrite the actual machine code stored in FLASH to change the blinking speed upon pushing a button
+- instead of changing a variable, let’s define the delay as a constant within the blink function
+- rewrite the actual machine code stored in FLASH to change the blinking speed upon pushing a button
 
 Of note, it is highly advised to get a sense for the memory location and memory types before taking a dive into NVM management. I will touch upon them a bit below within the “particularities” section, but there won’t be a detailed explanation given on them.
 It is also very useful to forget about thinking in variables and instead start thinking in memory locations instead. Using variables is just a shortcut to a memory location where the mcu holds the value of the variable. If we know at which address the variable is, we can skip the middleman (the variable) and interact directly with the memory location instead.
@@ -29,14 +34,11 @@ It is very much recommended to read the following two sections as well to know w
 
 ## Particularities
 How an mcu deals with data is that it loads the code one has written sequentially to the empty sections of memory, right after the vector table (vector table is like a phone book for the mcu: it tells it how to access certain basic functions for it to do its job). As such, it very much depends on the code – as well as the compiler - where certain functions will end up in memory. Unless we don’t tell the compiler to specifically place a certain section of the code to a certain place, it will be placed randomly. This would make our hard-mode Blink example pretty difficult to pull off…
-So let’s put the Blink function of our code to a certain position in memory then!
-Well, that’s not that straightforward since it doesn’t seem to be a lot of option on it in our main.c file. That’s because we aren’t even doing it there!
-We need to go to the linker file… (stored in the root folder of the STM32 project with the extension “.ld”).
 
 ### Linker file
 So let’s put the Blink function of our code to a certain position in memory then!
 Well, that’s not that straightforward since it doesn’t seem to be a lot of option on it in our main.c file. That’s because we aren’t even doing it there!
-We need to go to the linker file… (stored in the root folder of the STM32 project with the extension “.ld”). Here, the file is provided separately.
+We need to go to the linker file… stored in the root folder of the STM32 project with the extension “.ld”. (For this project, the linker file is provided separately.)
 The linker file is used by the toolchain to assign memory locations and partitions. It is not written in c, but something called “link editor command language”. We can modify this linker file to have our own memory area/partition and then to force the compiler to move data into a section within that area. As such:
 1)We add a new memory partition called APP_MEM by adding a line to the “memory definition” part in the linker file just after the “RAM” and the “FLASH” areas. We define it to start from the origin 0x800c000 and have a length of 16kbytes. We need to decrease the FLASH partition length by the same length as APP_MEM is. Of note, the vector table (the mcu phone book) is – unless otherwise told so – will be stored at the memory address 0x8000000 thus the FLASH partition must start from there!
 /* Memories definition */
