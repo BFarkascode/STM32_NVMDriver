@@ -79,7 +79,7 @@ needs to be added before the prototype of the function. The proposed “__RAM_FU
 For more on linker files, I recommend checking this out: Writing Linker Script for STM32 (Arm Cortex M3)🛠️ | by Rohit Nimkar | Medium
 
 ### Memory replacement
-The FLASH must always be erased prior to writing to it. That’s because the NVM management system within the mcu does not overwrite the existing value within the memory position but instead uses a bitwise “OR” on the location. This is a simple addition if we have 0x0 in the memory, but if we are to write 0x80 to a location where we had 0x1 before, the result of the memory write will be 0x81.
+The FLASH must always be erased prior to writing to it. That’s because the NVM management system within the mcu does not overwrite the existing value within the memory position but instead uses a bitwise “OR” on the location. This is a simple addition if we have 0x0 in the memory, but if we are to write 0x80 to a location where we had 0x1 before, the result of the memory write will be 0x81. This "bug" is detected by an error flag within the NVM, but the L0xx series does not seem to have it.
 
 FLASH cannot be erased byte-by-byte either. The smaller section one can erase is a page of memory, which is 128 bytes of data. As such, for any kind of FLASH update, the smaller section to replace is 32 words (32 times 4 bytes).
 
