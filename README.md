@@ -41,6 +41,7 @@ Well, that’s not that straightforward since it doesn’t seem to be a lot of o
 We need to go to the linker file… stored in the root folder of the STM32 project with the extension “.ld”. (For this project, the linker file is provided separately.)
 The linker file is used by the toolchain to assign memory locations and partitions. It is not written in c, but something called “link editor command language”. We can modify this linker file to have our own memory area/partition and then to force the compiler to move data into a section within that area. As such:
 1)We add a new memory partition called APP_MEM by adding a line to the “memory definition” part in the linker file just after the “RAM” and the “FLASH” areas. We define it to start from the origin 0x800c000 and have a length of 16kbytes. We need to decrease the FLASH partition length by the same length as APP_MEM is. Of note, the vector table (the mcu phone book) is – unless otherwise told so – will be stored at the memory address 0x8000000 thus the FLASH partition must start from there!
+
 /* Memories definition */
 MEMORY
 {
@@ -65,7 +66,9 @@ MEMORY
   			ASSERT(LENGTH(APP_MEM) >= (__app_section_end__ - __app_section_start__), "APP memory has overflowed!")
 
 One more part to look at is the “initialized data section” or the “data” sections. This section is within RAM, albeit it is copied over from the FLASH. This is the “running” part of the code, the one that is moved over from the FLASH in order to execute the code. While RAM is actively engaged and used during code execution, FLASH may not be – or downright must not be as we will see in the half-page burst mode for the FLASH. We can move functions or variables over from FLASH and store them in RAM should we choose to. (We will choose to because we need to.) In order to place the function into RAM, the line
+
 __attribute__((section(".RamFunc")))
+
 needs to be added before the prototype of the function. The proposed “__RAM_FUNC” attribute assignment did not work for me on the STM32L0xx but should be fine on a BluePill.
 For more on linker files, I recommend checking this out: Writing Linker Script for STM32 (Arm Cortex M3)🛠️ | by Rohit Nimkar | Medium
 
