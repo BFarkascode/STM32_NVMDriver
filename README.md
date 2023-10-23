@@ -42,6 +42,7 @@ We need to go to the linker file… stored in the root folder of the STM32 proje
 The linker file is used by the toolchain to assign memory locations and partitions. It is not written in c, but something called “link editor command language”. We can modify this linker file to have our own memory area/partition and then to force the compiler to move data into a section within that area. As such:
 1)We add a new memory partition called APP_MEM by adding a line to the “memory definition” part in the linker file just after the “RAM” and the “FLASH” areas. We define it to start from the origin 0x800c000 and have a length of 16kbytes. We need to decrease the FLASH partition length by the same length as APP_MEM is. Of note, the vector table (the mcu phone book) is – unless otherwise told so – will be stored at the memory address 0x8000000 thus the FLASH partition must start from there!
 
+```
 /* Memories definition */
 MEMORY
 {
@@ -49,9 +50,11 @@ MEMORY
   FLASH    (rx)    : ORIGIN = 0x8000000,   LENGTH = 48K
   APP_MEM (rx)		: ORIGIN = 0x800C000,   LENGTH = 16K				/*we define a designated section to manipulate, otherwise we might mess up the app*/
 }
+```
 
 2)We define the app_section and then place it within the APP_MEM partition. We place the Blink_custom function we will be defining in the main.c into this section. The syntax is particular and should be followed to the letter, otherwise the compiler might optimize out the memory section. The “KEEP” keyword – which works at “volatile” in c - is particularly useful. ALIGN(4) is a Cortex M architecture demand to align the location to 4 bytes. We tell the linker to put this section into the APP_MEM area and we finish the definition with a memory overflow check, albeit this is not necessary.
 
+```
   /*APP mem section definition*/
   .app_section :														/*memory section in the FLASH memory block to store the APP*/
   {
@@ -63,20 +66,14 @@ MEMORY
   } > APP_MEM
   
   			/* check for memory overflow in the APP*/
-       /*APP mem section definition*/
-  .app_section :														/*memory section in the FLASH memory block to store the APP*/
-  {
-  	. = ALIGN(4);
-  	__app_section_start__ = .;
-  	KEEP(*(.app_section*))												/*KEEP must be used or the section might be removed by the compiler if not used*/
-  	KEEP(*(.text.Blink_custom))											/*we put the custom Blink function into the app memory for easier access*/
-  	__app_section_end__ = .;
-  } > APP_MEM
   			ASSERT(LENGTH(APP_MEM) >= (__app_section_end__ - __app_section_start__), "APP memory has overflowed!")
+```
 
 One more part to look at is the “initialized data section” or the “data” sections. This section is within RAM, albeit it is copied over from the FLASH. This is the “running” part of the code, the one that is moved over from the FLASH in order to execute the code. While RAM is actively engaged and used during code execution, FLASH may not be – or downright must not be as we will see in the half-page burst mode for the FLASH. We can move functions or variables over from FLASH and store them in RAM should we choose to. (We will choose to because we need to.) In order to place the function into RAM, the line
 
+```
 __attribute__((section(".RamFunc")))
+```
 
 needs to be added before the prototype of the function. The proposed “__RAM_FUNC” attribute assignment did not work for me on the STM32L0xx but should be fine on a BluePill.
 For more on linker files, I recommend checking this out: Writing Linker Script for STM32 (Arm Cortex M3)🛠️ | by Rohit Nimkar | Medium
