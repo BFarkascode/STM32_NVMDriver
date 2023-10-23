@@ -63,6 +63,15 @@ MEMORY
   } > APP_MEM
   
   			/* check for memory overflow in the APP*/
+       /*APP mem section definition*/
+  .app_section :														/*memory section in the FLASH memory block to store the APP*/
+  {
+  	. = ALIGN(4);
+  	__app_section_start__ = .;
+  	KEEP(*(.app_section*))												/*KEEP must be used or the section might be removed by the compiler if not used*/
+  	KEEP(*(.text.Blink_custom))											/*we put the custom Blink function into the app memory for easier access*/
+  	__app_section_end__ = .;
+  } > APP_MEM
   			ASSERT(LENGTH(APP_MEM) >= (__app_section_end__ - __app_section_start__), "APP memory has overflowed!")
 
 One more part to look at is the “initialized data section” or the “data” sections. This section is within RAM, albeit it is copied over from the FLASH. This is the “running” part of the code, the one that is moved over from the FLASH in order to execute the code. While RAM is actively engaged and used during code execution, FLASH may not be – or downright must not be as we will see in the half-page burst mode for the FLASH. We can move functions or variables over from FLASH and store them in RAM should we choose to. (We will choose to because we need to.) In order to place the function into RAM, the line
