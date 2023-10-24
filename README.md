@@ -81,18 +81,18 @@ needs to be added before the prototype of the function. The proposed “__RAM_FU
 For more on linker files, I recommend checking this out: Writing Linker Script for STM32 (Arm Cortex M3)🛠️ | by Rohit Nimkar | Medium
 
 ### Memory replacement
-The FLASH must always be erased prior to writing to it. That’s because the NVM management system within the mcu does not overwrite the existing value within the memory position but instead uses a bitwise “OR” on the location. This is a simple addition if we have 0x0 in the memory, but if we are to write 0x80 to a location where we had 0x1 before, the result of the memory write will be 0x81. This "bug" is detected by an error flag within the NVM, but the L0xx series does not seem to have it.
+The FLASH must always be erased prior to writing to it. That’s because the NVM management system within the mcu does not overwrite the existing value within the memory position but instead uses a bitwise “OR” on the location. This is a simple addition if we have 0x0 in the memory, but if we are to write, say, 0x80 to a location where we had 0x1 before, the result of the memory write will be 0x81. This "bug" is usually detected by an error flag within the NVM, but the L0xx series does not seem to have this detection (I know the BluePill does).
 
-FLASH cannot be erased byte-by-byte either. The smaller section one can erase is a page of memory, which is 128 bytes of data. As such, for any kind of FLASH update, the smaller section to replace is 32 words (32 times 4 bytes).
+FLASH cannot be erased byte-by-byte either. The smallest section one can erase is a page of memory, which is 128 bytes of data. As such, for any kind of FLASH update, the smallest section to replace is 32 words (32 times 4 bytes).
 
 FLASH has a word-by-word (4 bytes) and a half-page write capability. Half-page is more sensitive due to the bursting of data but is around 10 times faster than writing word-by-word. Nothing smaller than 4 bytes can be written.
 
-Lastly, one must be very cautious about the endian of the information that is funnelled into the FLASH. The writing process swaps the endian of the 4 bytes, where the 0th byte will be written to the last position (and vica versa) and the 1st will be swapped by the 2nd.
+Lastly, one must be very cautious about the endian of the information that is funnelled into the FLASH. The writing process swaps the endian of the 4 bytes, where the 0th byte will be written to the last position (and vica versa) and the 1st will be swapped by the 2nd. As such, all machine code need to be pre-swapped before being fed into the NVM driver.
 
 ### Blocking you MUST have!
-Writing to FLASH takes at least 3.2 ms, independent of which process is being executed (see refman page 94). During the time of writing into FLASH, the FLASH MUST NOT be used by any other function, IRQ, process, otherwise the mcu will freeze. As such, it must be ensured that whenever we are working with the FLASH, all other potential activities are halted, suspended or cancelled. (In my experience, this must be applied to non-used-defined IRQs as well such as certain systicks.) Word-by-word writing can be made blocking easily, but half-page needs special care.
+Writing to FLASH takes at least 3.2 ms, independent of which process is being executed (see refman page 94). During the time of writing into FLASH, the FLASH MUST NOT be used by any other function, IRQ, process, or anything really...otherwise the mcu will freeze. As such, it must be ensured that whenever we are working with the FLASH, all other potential activities are halted, suspended or cancelled. (In my experience, this must be applied to non-user-defined IRQs as well such as certain systicks.) Word-by-word writing can be made blocking easily to deal with this problem, but half-page needs special care (we will discuss this within the code itself).
 
-Half-page also must be run from RAM as the refman suggest multiple places (refman page 82, example code A.3.10). 
+Half-page also must be run from RAM directly following what the refman suggest (refman page 82, example code A.3.10). 
 
 ## User guide
 The driver codes provided are self-containing.
