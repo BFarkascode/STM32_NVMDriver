@@ -99,7 +99,9 @@ The driver codes provided are self-containing.
 
 The main.c shows working examples for the driver where we define a custom Blink function that is placed by the linker to a specific memory location (0x800C000). We then replace this Blink function (it is half a page long exactly) when we push a button. The difference between the versions of the Blnik function will be the blinking speed.
 
-For the sake of simplicity, the push button is connected directly to then external interrupt (EXTI). The code replacement functions are placed within the IRQ itself (which is not a good practice, but since we aren't doing anything else within the code, we don't care). The interrupt is activated on the L053r* nulceo board by pushing the blue button. The EXTI and how it is engaged is not explained here.
+For the sake of simplicity, the push button is connected directly to then external interrupt (EXTI). The code replacement functions are placed within the IRQ itself (which is not a good practice, but since we aren't doing anything else within the code, we don't care). The interrupt is activated on the L053r* nulceo board by pushing the blue button.
+
+The EXTI and how it is engaged is not explained separately: it is a short read in the refman with a straight forward implementation.
 
 On pushing the button, the blinking speed of the inbuilt LED should change (and then, unlike doing this by modifying a variable, retain that change upon reset) between 500 ms and 2000 ms.
 
