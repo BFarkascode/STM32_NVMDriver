@@ -128,7 +128,7 @@ void FLASHUpd_Word(uint32_t flash_word_addr, uint32_t updated_flash_value) {
 	 *
 	 *In practice:
 	 * 1)We do an endian swap on the input data (the FLASH will publish the data in an endian inverted to the code)
-	 * 		Note: if the transmission of the machine code already does an endian swap, this step is not necessary.
+	 * 		Note: if the transmitted machine code already had an endian swap, this step is not necessary.
 	 * 2)Unlock the NVM control register PECR.
 	 * 3)Unlock FLASH memory.
 	 * 4)Remove readout protection (if necessary)
@@ -187,7 +187,7 @@ void FLASHUpd_Word(uint32_t flash_word_addr, uint32_t updated_flash_value) {
 
 
 //4)Write a half-page to a FLASH address
-void FLASHUpd_HalfPage(uint32_t loc_var_current_flash_half_page_addr, uint8_t full_page_cnt_in_buf, uint8_t half_page_cnt_in_page) {
+void FLASHUpd_HalfPage(uint32_t flash_half_page_addr) {
 	/**
 	 * The function MUST run in RAM, not in FLASH!!!!!!
 	 * Call with the __RAM_FUNC attribute!!!!!
@@ -199,6 +199,8 @@ void FLASHUpd_HalfPage(uint32_t loc_var_current_flash_half_page_addr, uint8_t fu
 	 * The address of the action must align to a half page - first 6 bits of the first address must be 0.
 	 * The code assumes that the target position is empty. If it is not, the resulting word will be corrupted (a bitwise OR of the original value and the new one).
 	 * On L0xx, there is no NOTZEROERR control to avoid this corruption.
+	 *
+	 * Input is the address of the half page we have erased before. The buffer array is an extern called Data_buf and is half a page long.
 	 *
 	 * The process is very similar to the "erase", except that we pick the half-page FLASH programming in the control panel.
 	 * Additionally, we need to disable and re-enable all IRQs.
@@ -251,7 +253,7 @@ void FLASHUpd_HalfPage(uint32_t loc_var_current_flash_half_page_addr, uint8_t fu
 
 	//6)
 	for(uint8_t i = 0; i < 16; i++) {
-		*(__IO uint32_t*)(loc_var_current_flash_half_page_addr) = Rx_Message_buf[(32 * full_page_cnt_in_buf) + (16 * half_page_cnt_in_page) + i];
+		*(__IO uint32_t*)(flash_half_page_addr) = Data_buf[i];
 												//Note: the half page address does not need to be changed (similar to the erasing command)
 												//Note: we only need to step the pointer for the data we want to write into the FLASH
 	}
@@ -289,7 +291,7 @@ void FLASH_IRQHandler(void){
 	/**
 	* Priority assignemnt for the IRQ.
 	**/
-void FLASHIRQPriorEnable_Custom(void) {
+void FLASHIRQPriorEnable(void) {
 	NVIC_SetPriority(FLASH_IRQn, 1);
 	NVIC_EnableIRQ(FLASH_IRQn);
 }
