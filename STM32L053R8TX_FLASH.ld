@@ -52,6 +52,20 @@ MEMORY
 /* Sections */
 SECTIONS
 {
+
+/*APP mem section definition*/
+  .app_section :														/*memory section in the FLASH memory block to store the APP*/
+  {
+  	. = ALIGN(4);
+  	__app_section_start__ = .;
+  	KEEP(*(.app_section*))												/*KEEP must be used or the section might be removed by the compiler if not used*/
+  	KEEP(*(.text.Blink_custom))											/*we put the custom Blink function into the app memory for easier access*/
+  	__app_section_end__ = .;
+  } > APP_MEM
+  
+/* check for memory overflow in the APP*/
+ASSERT(LENGTH(APP_MEM) >= (__app_section_end__ - __app_section_start__), "APP memory has overflowed!")
+
   /* The startup code into "FLASH" Rom type memory */
   .isr_vector :
   {
@@ -76,19 +90,6 @@ SECTIONS
     . = ALIGN(4);
     _etext = .;        /* define a global symbols at end of code */
   } >FLASH
-
-/*APP mem section definition*/
-  .app_section :														/*memory section in the FLASH memory block to store the APP*/
-  {
-  	. = ALIGN(4);
-  	__app_section_start__ = .;
-  	KEEP(*(.app_section*))												/*KEEP must be used or the section might be removed by the compiler if not used*/
-  	KEEP(*(.text.Blink_custom))											/*we put the custom Blink function into the app memory for easier access*/
-  	__app_section_end__ = .;
-  } > APP_MEM
-  
-/* check for memory overflow in the APP*/
-ASSERT(LENGTH(APP_MEM) >= (__app_section_end__ - __app_section_start__), "APP memory has overflowed!")
 
   /* Constant data into "FLASH" Rom type memory */
   .rodata :
