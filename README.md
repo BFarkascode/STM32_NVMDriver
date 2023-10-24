@@ -80,6 +80,9 @@ needs to be added before the prototype of the function. The proposed “__RAM_FU
 
 For more on linker files, I recommend checking this out: Writing Linker Script for STM32 (Arm Cortex M3)🛠️ | by Rohit Nimkar | Medium
 
+### The pain of updating only a function
+Even though we will have the function at a certain sport after this part, the update may still not be completely straight forward. As it goes, the machine code definining the function can change if one changes does not actually change the function itself! That is because the function relies on pointers in the background for its processes and those pointers will start to point to different places if the code is changed. As such, the provided example code will only work as long as nothing is changed in it. (If one does wish to change things, the machine code for the fucntion that is being uploaded into the mcu will need to be adapted by hand).
+
 ### Memory replacement
 The FLASH must always be erased prior to writing to it. That’s because the NVM management system within the mcu does not overwrite the existing value within the memory position but instead uses a bitwise “OR” on the location. This is a simple addition if we have 0x0 in the memory, but if we are to write, say, 0x80 to a location where we had 0x1 before, the result of the memory write will be 0x81. This "bug" is usually detected by an error flag within the NVM, but the L0xx series does not seem to have this detection (I know the BluePill does).
 
@@ -92,7 +95,7 @@ Lastly, one must be very cautious about the endian of the information that is fu
 ### Blocking you MUST have!
 Writing to FLASH takes at least 3.2 ms, independent of which process is being executed (see refman page 94). During the time of writing into FLASH, the FLASH MUST NOT be used by any other function, IRQ, process, or anything really...otherwise the mcu will freeze. As such, it must be ensured that whenever we are working with the FLASH, all other potential activities are halted, suspended or cancelled. (In my experience, this must be applied to non-user-defined IRQs as well such as certain systicks.) Word-by-word writing can be made blocking easily to deal with this problem, but half-page needs special care (we will discuss this within the code itself).
 
-Half-page also must be run from RAM directly following what the refman suggest (refman page 82, example code A.3.10). 
+Half-page also must be run from RAM directly following what the refman suggest (refman page 82, example code A.3.10).
 
 ## User guide
 The driver codes provided are self-containing.
