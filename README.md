@@ -54,7 +54,7 @@ MEMORY
 }
 ```
 
-2) We define the app_section and then place it within the APP_MEM partition. We place the Blink_custom function we will be defining in the main.c into this section. The syntax is particular and should be followed to the letter, otherwise the compiler might optimize out the memory section. The “KEEP” keyword – which works at “volatile” in c - is particularly useful. ALIGN(4) is a Cortex M architecture demand to align the location to 4 bytes. All in all, we tell the linker to put this section into the APP_MEM area and we finish the definition with a memory overflow check, albeit this is not necessary.
+2) We define the app_section and then place it within the APP_MEM partition. We place the Blink_custom function we will be defining in the main.c into this section. The syntax is particular and should be followed to the letter (including the position of the definition within the linker!), otherwise the compiler might optimize out the memory section. The “KEEP” keyword – which works at “volatile” in c - is particularly useful. ALIGN(4) is a Cortex M architecture demand to align the location to 4 bytes. All in all, we tell the linker to put this section into the APP_MEM area and we finish the definition with a memory overflow check, albeit this is not necessary.
 
 ```
 /*APP mem section definition*/
