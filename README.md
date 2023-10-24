@@ -97,7 +97,7 @@ Half-page also must be run from RAM directly following what the refman suggest (
 ## User guide
 The driver codes provided are self-containing.
 
-The main.c shows working examples for the driver where we define a custom Blink function that is placed by the linker to a specific memory location (0x800C000). We then replace this Blink function (it is half a page long exactly) when we push a button. The difference between the versions of the Blnik function will be the blinking speed.
+The main.c shows working examples for the driver where we define a custom Blink function that is placed by the linker to a specific memory location (0x800C000). We then replace this Blink function (it is half a page long exactly) when we push a button. The Blink function uses HAL_Delay for the timing, but it does not use any other HAL command. The reasons for this is that using, say HAL_Toggle, increases the memory footprint of the function to more than half a page which adds unnecessary complexity to the project. The difference between the versions of the Blnik functions is the blinking speed.
 
 For the sake of simplicity, the push button is connected directly to then external interrupt (EXTI). The code replacement functions are placed within the IRQ itself (which is not a good practice, but since we aren't doing anything else within the code, we don't care). The interrupt is activated on the L053r* nulceo board by pushing the blue button.
 
