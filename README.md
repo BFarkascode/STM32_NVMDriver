@@ -80,9 +80,6 @@ needs to be added before the prototype of the function. The proposed “__RAM_FU
 
 For more on linker files, I recommend checking this out: Writing Linker Script for STM32 (Arm Cortex M3)🛠️ | by Rohit Nimkar | Medium
 
-### The pain of updating only a function
-Even though we will have the function at a certain sport after this part, the update may still not be completely straight forward. As it goes, the machine code definining the function can change if one changes does not actually change the function itself! That is because the function relies on pointers in the background for its processes and those pointers will start to point to different places if the code is changed. As such, the provided example code will only work as long as nothing is changed in it. (If one does wish to change things, the machine code for the fucntion that is being uploaded into the mcu will need to be adapted by hand).
-
 ### Memory replacement
 The FLASH must always be erased prior to writing to it. That’s because the NVM management system within the mcu does not overwrite the existing value within the memory position but instead uses a bitwise “OR” on the location. This is a simple addition if we have 0x0 in the memory, but if we are to write, say, 0x80 to a location where we had 0x1 before, the result of the memory write will be 0x81. This "bug" is usually detected by an error flag within the NVM, but the L0xx series does not seem to have this detection (I know the BluePill does).
 
@@ -100,4 +97,8 @@ Half-page also must be run from RAM directly following what the refman suggest (
 ## User guide
 The driver codes provided are self-containing.
 
-The main.c shows working examples for the driver where we define a custom Blink function that is placed by the linker to a specific memory location. We then replace this Blink function (it is half a page long exactly) when we push a button. The difference between the versions of the Blnik function will be the blinking speed.
+The main.c shows working examples for the driver where we define a custom Blink function that is placed by the linker to a specific memory location (0x800C000). We then replace this Blink function (it is half a page long exactly) when we push a button. The difference between the versions of the Blnik function will be the blinking speed.
+
+For the sake of simplicity, the push button is connected directly to then external interrupt. The code replacement functions are placed within the IRQ itself (which is not a good practice, but since we aren't doing anything else within the code, we don't care).
+
+Also, of note, the machine code definining the function can change if one does not actually change the function itself! That is because the function relies on pointers in the background for its processes and those pointers will start to point to different places if the code is changed (in other words, the compiler will not compile the code the same way if one changes anything in the code...differntly compiled code means different machine code...which means that memory location will not be the same as before). As such, the provided example code will only work as long as nothing is changed in it. If one does wish to change things in the example, the machine code for the function that is being uploaded into the mcu within the push button IRQ will need to be adapted by hand (experience suggests that byte 0x800c01c and byte 0x800c036 are the pointers that will need to be checked). One can directly check memory positions after the porject is built and the memory viewer in the STM32CubeIDE is opened.
