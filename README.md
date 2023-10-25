@@ -90,7 +90,7 @@ FLASH has a word-by-word (4 bytes) and a half-page write capability. Half-page i
 Lastly, one must be very cautious about the endian of the information that is funnelled into the FLASH. The writing process swaps the endian of the 4 bytes, where the 0th byte will be written to the last position (and vica versa) and the 1st will be swapped by the 2nd. As such, all machine code need to be pre-swapped before being fed into the NVM driver.
 
 ### Blocking you MUST have!
-Writing to FLASH takes at least 3.2 ms, independent of which process is being executed (see refman page 94). During the time of writing into FLASH, the FLASH MUST NOT be used by any other function, IRQ, process, or anything really...otherwise the mcu will freeze. As such, it must be ensured that whenever we are working with the FLASH, all other potential activities are halted, suspended or cancelled. (In my experience, this must be applied to non-user-defined IRQs as well such as certain systicks.) Word-by-word writing can be made blocking easily to deal with this problem, but half-page needs special care (we will discuss this within the code itself).
+Writing to FLASH takes at least 3.2 ms, independent of which process is being executed (see refman page 94). During the time of writing into FLASH, the FLASH MUST NOT be used by any other function, interrupts (IRQ), process, or anything really...otherwise the mcu will freeze. As such, it must be ensured that whenever we are working with the FLASH, all other potential activities are halted, suspended or cancelled. (In my experience, this must be applied to non-user-defined IRQs as well such as certain systicks.) Word-by-word writing can be made blocking easily to deal with this problem, but half-page needs special care (we will discuss this within the code itself).
 
 Half-page also must be run from RAM directly following what the refman suggest (refman page 82, example code A.3.10).
 
@@ -101,7 +101,7 @@ The main.c shows working examples for the driver where we define a custom Blink 
 
 For the sake of simplicity, the push button is connected directly to then external interrupt (EXTI). The code replacement functions are placed within the IRQ itself (which is not a good practice, but since we aren't doing anything else within the code, we don't care). The interrupt is activated on the L053r9 nucleo board by pushing the blue button.
 
-The EXTI and how it is engaged is not explained separately: it is a short read in the refman with a straight forward implementation.
+The EXTI and how it is engaged is not explained separately: it is a short read in the refman with a straight forward implementation. (I do touch upon interrupts a bit more in detail in the DMADriver project.)
 
 On pushing the button, the blinking speed of the inbuilt LED should change (and then, unlike doing this by modifying a variable, retain that change upon reset) between 500 ms and 2000 ms.
 
