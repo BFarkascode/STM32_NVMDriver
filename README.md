@@ -23,6 +23,10 @@ Yes, by doing this, we do make our lives significantly more complicated. Neverth
 Of note, before we take a dive-in, it is highly advised to get a sense for the memory location and memory types. I will touch upon them a bit below within the “particularities” section, but there won’t be a detailed explanation given on them. (This is a good place to start: http://www.gotw.ca/gotw/009.htm)
 It is also very useful to forget about thinking in variables and instead start thinking in memory locations instead. Using variables is just a shortcut to a memory location where the mcu holds the value of the variable. If we know at which address the variable is, we can skip the middleman (the variable) and interact directly with the memory location instead. This is what pointers do...and no, they aren't easy to get a hang of. Unfortunately, the way how I got on terms with them is simply by using them. No amount of reading could help me get a hang of them.
 
+## Previous relevant projects
+The following projects should be checked:
+- STM32_DMADriver (only the part with the interrupts)
+
 
 ## To read
 The refman discusses a myriad of ways to optimize NVM use which we are not concerned about right now. Similarly, it discusses not just the FLASH, but also the option bits and the EEPROM which we aren’t looking into here either. As such, the absolutely relevant sections in the refman to write to the FLASH directly are (I am using the refman for the L0x3 here):
