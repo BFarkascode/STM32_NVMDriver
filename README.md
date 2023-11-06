@@ -1,6 +1,8 @@
 # STM32_NVMDriver
+
+We will implement a FLASH programming memory modification using bare metal programming on an STM32L0x3 mcu.
+
 ## General description
-This is a bare metal guide for implementing FLASH management for STM32L0xx.
 
 First and foremost, it must be discussed what we will be doing and on what. There are multiple memory types in the mcu, such as RAM, FLASH, EEPROM…and even though the driver section in the reference manual (refman) talks about non-volatile memory (NVM) and call the registers "FLASH", we will be looking at the FLASH memory only. As such, even though the refman will be constantly pointing to NVMs in general, we will be talking about FLASH.
 
