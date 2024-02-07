@@ -1,8 +1,16 @@
 /*
- * NVMDriver_STM32L0x3.h				v.1.0.
  *
  *  Created on: Oct 25, 2023
- *      Author: Balazs Farkas
+ *  Project: STM32_NVMDriver
+ *  File: NVMDriver_STM32L0x3.h
+ *  Author: BalazsFarkas
+ *  Processor: STM32L053R8
+ *  Compiler: ARM-GCC (STM32 IDE)
+ *  Program version: 1.0
+ *  Program description: N/A
+ *  Hardware description/pin distribution: N/A
+ *  Modified from: N/A
+ *  Change history: N/A
  */
 
 #ifndef INC_NVMDRIVER_STM32L0x3_CUSTOM_H_
