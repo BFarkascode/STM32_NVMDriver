@@ -1,15 +1,12 @@
 /* USER CODE BEGIN Header */
 /**
-
- *  Project: STM32_NVMDriver
- *  File: main.c
  *  Author: BalazsFarkas
+ *  Project: STM32_NVMDriver
  *  Processor: STM32L053R8
  *  Compiler: ARM-GCC (STM32 IDE)
  *  Program version: 1.0
- *  Program description: N/A
- *  Hardware description/pin distribution: N/A
- *  Modified from: N/A
+ *  File: main.c
+ *  Hardware description/pin distribution: LED on PA5, EXTI13 push button on PC13
  *  Change history: N/A
   ******************************************************************************
   * @file           : main.c
