@@ -1,20 +1,13 @@
 /*
- *
  *  Created on: Oct 24, 2023
- *  Project: STM32_NVMDriver
- *  File: EXTIDriver_STM32L0x3.h
  *  Author: BalazsFarkas
+ *  Project: STM32_NVMDriver
  *  Processor: STM32L053R8
- *  Compiler: ARM-GCC (STM32 IDE)
- *  Program version: 1.0
- *  Program description: N/A
- *  Hardware description/pin distribution: N/A
- *  Modified from: N/A
- *  Change history: N/A
+ *  HEader version: 1.0
+ *  File: EXTIDriver_STM32L0x3.h
  *
  *      This is a driver for external interrupts.
  *      It is followed by the definition of the callback function of each EXTI.
- *
  */
 
 #ifndef INC_EXTIDRIVER_CUSTOM_H_
