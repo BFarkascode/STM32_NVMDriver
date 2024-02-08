@@ -1,4 +1,11 @@
 /*
+ *  Author: BalazsFarkas
+ *  Project: STM32_NVMDriver
+ *  Processor: STM32L053R8
+ *  Compiler: ARM-GCC (STM32 IDE)
+ *  Linker version: 1.0
+ *  File: STM32L053R8TX_FLASH.ld
+ *  Change history: N/A
 ******************************************************************************
 **
 ** @file        : LinkerScript.ld
